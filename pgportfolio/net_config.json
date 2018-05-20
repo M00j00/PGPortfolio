@@ -17,7 +17,7 @@
   },
 
   "input":{
-    "window_size":31,
+    "window_size":360,
     "coin_number":11,
     "global_period":1800,
     "feature_number":3,
@@ -25,7 +25,7 @@
     "online":false,
     "start_date":"2015/07/01",
     "end_date":"2017/07/01",
-    "volume_average_days":30
+    "volume_average_days":60
   },
 
   "trading":{
