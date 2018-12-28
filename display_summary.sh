@@ -1,5 +1,5 @@
 get_id_trained(){
-awk -F ',' '{print $1}' ~/portfolio/train_package/train_summary.csv | grep -v "net_dir"
+awk -F ',' '{print $1}' ./train_package/train_summary.csv | grep -v "net_dir"
 }
 
 models=$(get_id_trained)
@@ -8,4 +8,4 @@ do
 	model_list=${model_list:+$model_list},$model
 done
 models=${model_list#,}
-python3 main.py --mode=table --algos=$models --labels=$models
+python main.py --mode=table --algos=$models --labels=$models
