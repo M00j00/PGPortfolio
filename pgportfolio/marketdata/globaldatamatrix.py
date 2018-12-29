@@ -115,7 +115,7 @@ class HistoryManager:
                     serial_data = pd.read_sql_query(sql, con=connection,
                                                     parse_dates=["date_norm"],
                                                     index_col="date_norm")
-                    print("Coin:", coin, "feature:", feature, "sql", sql)
+                    #print("Coin:", coin, "feature:", feature, "sql", sql)
                     #print(serial_data)
                     panel.loc[feature, coin, serial_data.index] = serial_data.squeeze()
                     panel = panel_fillna(panel, "both")
