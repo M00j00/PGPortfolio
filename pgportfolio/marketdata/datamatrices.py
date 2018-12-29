@@ -95,9 +95,9 @@ class DataMatrices:
         train_config = config["training"]
         start = parse_time(input_config["start_date"])
         end = parse_time(input_config["end_date"])
-        if input_config["live"]:
-            logging.info("[LIVE] end date is now:" + str(parse_time(.now().strftime('%Y/%m/%d %h%M'), '%Y/%m/%d %h%M')))
-            end = parse_time(datetime.now().strftime('%Y/%m/%d %h%M'), '%Y/%m/%d %h%M')
+        #if input_config["live"]:
+        #    logging.info("[LIVE] end date is now:" + str(parse_time(.now().strftime('%Y/%m/%d %h%M'), '%Y/%m/%d %h%M')))
+        end = parse_time(datetime.now().strftime('%Y/%m/%d %h%M'), '%Y/%m/%d %h%M')
         return DataMatrices(start=start,
                             end=end,
                             market=input_config["market"],
