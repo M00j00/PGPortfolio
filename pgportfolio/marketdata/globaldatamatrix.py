@@ -77,7 +77,7 @@ class HistoryManager:
 
         connection = sqlite3.connect(DATABASE_DIR)
         try:
-            with tqdm(total=len(coins)) as pbar:
+            with tqdm(total=len(coins) * len(features)) as pbar:
                 for row_number, coin in tqdm(enumerate(coins)):
                     for feature in features:
                         # NOTE: transform the start date to end date
