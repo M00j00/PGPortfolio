@@ -29,6 +29,7 @@ class LiveTrader(trader.Trader):
         self.__set = data_matrices.get_test_set()
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
+        print("steps:", self.__length)
         self.__pv = 1.0
         self.__pc_vector = []
 
@@ -53,9 +54,9 @@ class LiveTrader(trader.Trader):
 
     def __log_pfinfo_info(self, omega):
         if self._steps > 0:
-            logging_dict = {'Total Asset (BTC)': self._total_capital, 'BTC': omega[0, 0]}
+            logging_dict = {'Total Asset (BTC)': self._total_capital, 'BTC': omega[0]}
             for i in range(len(self._coin_name_list)):
-                logging_dict[self._coin_name_list[i]] = omega[0, i + 1]
+                logging_dict[self._coin_name_list[i]] = omega[i + 1]
             logging.debug(logging_dict)
 
     def _initialize_data_base(self):
