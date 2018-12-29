@@ -12,23 +12,7 @@ class LiveTrader(trader.Trader):
         trader.Trader.__init__(self, 5, config, 10, net_dir,
                                initial_BTC=1, agent=agent, agent_type=agent_type)
 
-        if agent_type == "nn":
-            data_matrices = self._rolling_trainer.data_matrices
-        else:
-            raise ValueError()
-        #DataMatrices(start=start,
-        #             end=end,
-        #             feature_number=config["input"]["feature_number"],
-        #             window_size=config["input"]["window_size"],
-        #             online=True,
-        #             period=config["input"]["global_period"],
-        #             volume_average_days=config["input"]["volume_average_days"],
-        #             coin_filter=config["input"]["coin_number"],
-        #             is_permed=config["input"]["is_permed"],
-        #             test_portion=config["input"]["test_portion"],
-        #             portion_reversed=config["input"]["portion_reversed"])
-
-        self.__set = data_matrices.get_test_set()
+        self.__set = self._rolling_trainer.data_matrices.get_live_set()
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
         print("steps:", self.__length)
@@ -78,6 +62,7 @@ class LiveTrader(trader.Trader):
         self._rolling_trainer.rolling_train()
 
     def generate_history_matrix(self):
+        self.__set = self._rolling_trainer.data_matrices.get_live_set()
         return self.__get_matrix_X()
 
     def trade_by_strategy(self, omega):
