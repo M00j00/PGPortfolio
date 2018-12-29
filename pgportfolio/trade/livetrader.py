@@ -9,20 +9,20 @@ from pgportfolio.tools.trade import calculate_pv_after_commission
 
 class LiveTrader(trader.Trader):
     def __init__(self, config, net_dir=None, agent=None, agent_type="nn"):
-        trader.Trader.__init__(self, 5, config, 10, net_dir,
+        trader.Trader.__init__(self, 20, config, 10, net_dir,
                                initial_BTC=1, agent=agent, agent_type=agent_type)
 
         self.__set = self._rolling_trainer.data_matrices.get_live_set()
-        self.__test_set = self._rolling_trainer.data_matrices.get_test_set()
+        #self.__test_set = self._rolling_trainer.data_matrices.get_test_set()
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
-        self._steps = self.__length
+        self._steps = self._total_steps - 1
         print("steps:", self._steps)
         self.__pv = 1.0
         self.__pc_vector = []
 
     @property
-    def test_pv(self):
+    def pv(self):
         return self.__pv
 
     @property
