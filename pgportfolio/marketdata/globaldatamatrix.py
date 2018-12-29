@@ -79,7 +79,7 @@ class HistoryManager:
         try:
             logging.info("Loading dataset...")
             with tqdm(total=len(coins) * len(features)) as pbar:
-                for row_number, coin in tqdm(enumerate(coins)):
+                for row_number, coin in enumerate(coins):
                     for feature in features:
                         # NOTE: transform the start date to end date
                         if feature == "close":

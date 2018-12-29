@@ -147,15 +147,15 @@ class DataMatrices:
         self.__replay_buffer.append_experience(appended_index)
 
     def get_test_set(self):
-        print(self.test_indices)
+        #print(self.test_indices)
         return self.__pack_samples(self.test_indices)
 
     def get_training_set(self):
         return self.__pack_samples(self._train_ind[:-self._window_size])
 
     def get_live_set(self):
-        print(np.arange(self._num_periods))
-        return self.__pack_samples(np.arange(self._num_periods)[:-self._window_size])
+        print(np.arange(self._num_periods)[:-self._window_size:])
+        return self.__pack_samples(np.arange(self._num_periods)[:-self._window_size:])
 
     def next_batch(self):
         """
