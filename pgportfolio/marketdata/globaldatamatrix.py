@@ -10,6 +10,7 @@ from pgportfolio.constants import *
 import sqlite3
 from datetime import datetime
 import logging
+from tqdm import tqdm
 
 
 class HistoryManager:
@@ -73,7 +74,7 @@ class HistoryManager:
 
         connection = sqlite3.connect(DATABASE_DIR)
         try:
-            for row_number, coin in enumerate(coins):
+            for row_number, coin in tqdm(enumerate(coins)):
                 for feature in features:
                     # NOTE: transform the start date to end date
                     if feature == "close":
@@ -115,7 +116,7 @@ class HistoryManager:
                                                     parse_dates=["date_norm"],
                                                     index_col="date_norm")
                     print("Coin:", coin, "feature:", feature, "sql", sql)
-                    print(serial_data)
+                    #print(serial_data)
                     panel.loc[feature, coin, serial_data.index] = serial_data.squeeze()
                     panel = panel_fillna(panel, "both")
         finally:
