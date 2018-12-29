@@ -30,7 +30,7 @@ def execute_livetrade(algo, config):
     agent, agent_type, net_dir = _construct_agent(algo)
     livetrader = LiveTrader(config, agent=agent, agent_type=agent_type, net_dir=net_dir)
     livetrader.start_trading()
-    return livetrader.__pc_vector
+    return livetrader.pc_vector
 
 def _construct_agent(algo):
     if algo.isdigit():
