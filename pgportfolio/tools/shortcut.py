@@ -28,9 +28,9 @@ def execute_livetrade(algo, config):
     @:return: numpy array of portfolio changes
     """
     agent, agent_type, net_dir = _construct_agent(algo)
-    backtester = LiveTrader(config, agent=agent, agent_type=agent_type, net_dir=net_dir)
-    backtester.start_trading()
-    return backtester.test_pc_vector
+    livetrader = LiveTrader(config, agent=agent, agent_type=agent_type, net_dir=net_dir)
+    livetrader.start_trading()
+    return livetrader.__pc_vector
 
 def _construct_agent(algo):
     if algo.isdigit():
