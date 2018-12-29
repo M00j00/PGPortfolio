@@ -65,7 +65,7 @@ class LiveTrader(trader.Trader):
 
     def generate_history_matrix(self):
         logging.info("Getting dataset")
-        self.__set = self._rolling_trainer.data_matrices.get_live_set()
+        self.__set = self._rolling_trainer.data_matrices.get_test_set()
         return self.__get_matrix_X()
 
     def trade_by_strategy(self, omega):
