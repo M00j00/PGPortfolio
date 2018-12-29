@@ -10,6 +10,7 @@ from pgportfolio.tools.configprocess import preprocess_config
 from pgportfolio.tools.configprocess import load_config
 from pgportfolio.tools.trade import save_test_data
 from pgportfolio.tools.shortcut import execute_backtest
+from pgportfolio.tools.shortcut import execute_livetrade
 from pgportfolio.resultprocess import plot
 
 

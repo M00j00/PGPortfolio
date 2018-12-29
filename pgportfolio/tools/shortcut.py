@@ -21,7 +21,7 @@ def execute_backtest(algo, config):
     backtester.start_trading()
     return backtester.test_pc_vector
 
-def execute_backtest(algo, config):
+def execute_livetrade(algo, config):
     """
     @:param algo: string representing the name the name of algorithms
     @:return: numpy array of portfolio changes
