@@ -4,10 +4,10 @@ import logging
 import os
 import time
 from argparse import ArgumentParser
-from datetime import datetime
+from datetime import datetime, date
 
 from pgportfolio.tools.configprocess import preprocess_config
-from pgportfolio.tools.configprocess import load_config
+from pgportfolio.tools.configprocess import load_config, parse_time
 from pgportfolio.tools.trade import save_test_data
 from pgportfolio.tools.shortcut import execute_backtest
 from pgportfolio.tools.shortcut import execute_livetrade
@@ -87,6 +87,7 @@ def main():
     elif options.mode == "livetrade":
         config = _config_by_algo(options.algo)
         _set_logging_by_algo(logging.DEBUG, logging.DEBUG, options.algo, "livetradelog")
+        config["input"]["end_date"] = date.today.strftime('%Y/%m/%d')
         execute_livetrade(options.algo, config)
     elif options.mode == "save_test_data":
         # This is used to export the test data
