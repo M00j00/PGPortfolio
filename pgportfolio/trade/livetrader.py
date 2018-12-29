@@ -80,5 +80,4 @@ class LiveTrader(trader.Trader):
                            portfolio_change
         logging.debug("the portfolio change this period is : {}".format(portfolio_change))
         self.__pc_vector.append(portfolio_change)
-        self.
 
