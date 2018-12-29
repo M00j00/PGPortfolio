@@ -26,7 +26,7 @@ class LiveTrader(trader.Trader):
         return self.__pv
 
     @property
-    def test_pc_vector(self):
+    def pc_vector(self):
         return np.array(self.__pc_vector, dtype=np.float32)
 
     def finish_trading(self):
@@ -68,7 +68,7 @@ class LiveTrader(trader.Trader):
     def trade_by_strategy(self, omega):
         logging.info("the step is {}".format(self._steps))
         logging.debug("the raw omega is {}".format(omega))
-        _log_trading_info(self, omega)
+        self._log_trading_info(self, omega)
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
         portfolio_change = pv_after_commission * np.dot(omega, future_price)
