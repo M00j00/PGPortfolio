@@ -90,8 +90,8 @@ def byteify(input):
         return input
 
 
-def parse_time(time_string):
-    return time.mktime(datetime.strptime(time_string, "%Y/%m/%d").timetuple())
+def parse_time(time_string, format="%Y/%m/%d"):
+    return time.mktime(datetime.strptime(time_string, format).timetuple())
 
 
 def load_config(index=None):

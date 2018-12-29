@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 from pgportfolio.trade import trader
 from pgportfolio.marketdata.datamatrices import DataMatrices
+from pgportfolio.tools.configprocess import parse_time
 import logging
 from pgportfolio.tools.trade import calculate_pv_after_commission
 
@@ -10,6 +11,7 @@ class LiveTrader(trader.Trader):
     def __init__(self, config, net_dir=None, agent=None, agent_type="nn"):
         trader.Trader.__init__(self, 5, config, 10, net_dir,
                                initial_BTC=1, agent=agent, agent_type=agent_type)
+
         if agent_type == "nn":
             data_matrices = self._rolling_trainer.data_matrices
         else:
