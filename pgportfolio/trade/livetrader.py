@@ -16,6 +16,7 @@ class LiveTrader(trader.Trader):
         self.__test_set = self._rolling_trainer.data_matrices.get_test_set()
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
+        self._steps = self.__length
         print("steps:", self.__length)
         self.__pv = 1.0
         self.__pc_vector = []
