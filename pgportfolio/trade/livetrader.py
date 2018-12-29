@@ -17,7 +17,7 @@ class LiveTrader(trader.Trader):
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
         self._steps = self._total_steps - 1
-        print("steps:", self._steps)
+        print("step:", self._steps)
         self.__pv = 1.0
         self.__pc_vector = []
 
@@ -54,7 +54,7 @@ class LiveTrader(trader.Trader):
         pass
 
     def __get_matrix_X(self):
-        print(self.__set["X"][self._steps])
+        print("Steps:", self.__set["X"][self._steps])
         return self.__set["X"][self._steps]
 
     def __get_matrix_y(self):
@@ -73,8 +73,7 @@ class LiveTrader(trader.Trader):
         #logging.debug("the raw omega is {}".format(omega))
         self.__log_pfinfo_info(omega)
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
-        print("future_price:")
-        print(future_price)
+        print("future_price:", future_price)
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
         portfolio_change = pv_after_commission * np.dot(omega, future_price)
         self._total_capital *= portfolio_change

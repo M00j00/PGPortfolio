@@ -77,6 +77,7 @@ class HistoryManager:
 
         connection = sqlite3.connect(DATABASE_DIR)
         try:
+            logging.info("Loading dataset...")
             with tqdm(total=len(coins) * len(features)) as pbar:
                 for row_number, coin in tqdm(enumerate(coins)):
                     for feature in features:
@@ -201,7 +202,7 @@ class HistoryManager:
             start=start,
             end=end,
             period=self.__storage_period)
-        logging.info("fill %s data from %s to %s"%(coin, datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M'),
+        logging.info("Populating database with %s data from %s to %s"%(coin, datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M'),
                                             datetime.fromtimestamp(end).strftime('%Y-%m-%d %H:%M')))
         for c in chart:
             if c["date"] > 0:
