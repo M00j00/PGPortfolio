@@ -83,6 +83,10 @@ def main():
         config = _config_by_algo(options.algo)
         _set_logging_by_algo(logging.DEBUG, logging.DEBUG, options.algo, "backtestlog")
         execute_backtest(options.algo, config)
+    elif options.mode == "livetrade":
+        config = _config_by_algo(options.algo)
+        _set_logging_by_algo(logging.DEBUG, logging.DEBUG, options.algo, "livetradelog")
+        execute_livetrade(options.algo, config)
     elif options.mode == "save_test_data":
         # This is used to export the test data
         save_test_data(load_config(options.folder))
