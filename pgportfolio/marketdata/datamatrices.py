@@ -61,6 +61,7 @@ class DataMatrices:
         self._window_size = window_size
         self._num_periods = len(self.__global_data.minor_axis)
         self.__divide_data(test_portion, portion_reversed)
+        self._live_ind = 0
 
         self._portion_reversed = portion_reversed
         self.__is_permed = is_permed
@@ -79,6 +80,7 @@ class DataMatrices:
                      ", of test examples is %s" % (self._num_train_samples, self._num_test_samples))
         logging.debug("the training set is from %s to %s" % (min(self._train_ind), max(self._train_ind)))
         logging.debug("the test set is from %s to %s" % (min(self._test_ind), max(self._test_ind)))
+        logging.debug("the live set is index: %s" % (self._live_ind))
 
     @property
     def global_weights(self):
@@ -97,7 +99,7 @@ class DataMatrices:
         end = parse_time(input_config["end_date"])
         #if input_config["live"]:
         #    logging.info("[LIVE] end date is now:" + str(parse_time(.now().strftime('%Y/%m/%d %h%M'), '%Y/%m/%d %h%M')))
-        end = parse_time(datetime.now().strftime('%Y/%m/%d %H%M'), '%Y/%m/%d %H%M')
+        #end = parse_time(datetime.now().strftime('%Y/%m/%d %H%M'), '%Y/%m/%d %H%M')
         return DataMatrices(start=start,
                             end=end,
                             market=input_config["market"],
@@ -149,6 +151,9 @@ class DataMatrices:
 
     def get_training_set(self):
         return self.__pack_samples(self._train_ind[:-self._window_size])
+
+    def get_live_set(self):
+        pass
 
     def next_batch(self):
         """
