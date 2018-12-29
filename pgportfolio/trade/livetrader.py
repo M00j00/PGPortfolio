@@ -40,7 +40,7 @@ class LiveTrader(trader.Trader):
         plt.show()
         """
 
-    def __log_trading_info(self, omega):
+    def __log_pfinfo_info(self, omega):
         if self._steps > 0:
             logging_dict = {'Total Asset (BTC)': self._total_capital, 'BTC': omega[0, 0]}
             for i in range(len(self._coin_name_list)):
@@ -68,7 +68,7 @@ class LiveTrader(trader.Trader):
     def trade_by_strategy(self, omega):
         logging.info("the step is {}".format(self._steps))
         logging.debug("the raw omega is {}".format(omega))
-        self.__log_trading_info(self, omega)
+        self.__log_pfinfo_info(self, omega)
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
         portfolio_change = pv_after_commission * np.dot(omega, future_price)
