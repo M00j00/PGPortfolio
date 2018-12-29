@@ -12,27 +12,25 @@ class LiveTrader(trader.Trader):
                                initial_BTC=1, agent=agent, agent_type=agent_type)
         if agent_type == "nn":
             data_matrices = self._rolling_trainer.data_matrices
-        elif agent_type == "traditional":
-            config["input"]["feature_number"] = 1
-            data_matrices = DataMatrices.create_from_config(config)
         else:
             raise ValueError()
-        self.__test_set = data_matrices.get_test_set()
-        self.__test_length = self.__test_set["X"].shape[0]
-        self._total_steps = self.__test_length
-        self.__test_pv = 1.0
-        self.__test_pc_vector = []
+
+        self.__set = data_matrices.get_test_set()
+        self.__length = self.__set["X"].shape[0]
+        self._total_steps = self.__length
+        self.__pv = 1.0
+        self.__pc_vector = []
 
     @property
     def test_pv(self):
-        return self.__test_pv
+        return self.__pv
 
     @property
     def test_pc_vector(self):
-        return np.array(self.__test_pc_vector, dtype=np.float32)
+        return np.array(self.__pc_vector, dtype=np.float32)
 
     def finish_trading(self):
-        self.__test_pv = self._total_capital
+        self.__pv = self._total_capital
 
         """
         fig, ax = plt.subplots()
@@ -57,10 +55,10 @@ class LiveTrader(trader.Trader):
         pass
 
     def __get_matrix_X(self):
-        return self.__test_set["X"][self._steps]
+        return self.__set["X"][self._steps]
 
     def __get_matrix_y(self):
-        return self.__test_set["y"][self._steps, 0, :]
+        return self.__set["y"][self._steps, 0, :]
 
     def rolling_train(self, online_sample=None):
         self._rolling_trainer.rolling_train()
@@ -79,5 +77,5 @@ class LiveTrader(trader.Trader):
                            future_price /\
                            portfolio_change
         logging.debug("the portfolio change this period is : {}".format(portfolio_change))
-        self.__test_pc_vector.append(portfolio_change)
+        self.__pc_vector.append(portfolio_change)
 
