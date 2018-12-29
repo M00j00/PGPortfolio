@@ -13,6 +13,7 @@ class LiveTrader(trader.Trader):
                                initial_BTC=1, agent=agent, agent_type=agent_type)
 
         self.__set = self._rolling_trainer.data_matrices.get_live_set()
+        self.__test_set = self._rolling_trainer.data_matrices.get_test_set()
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
         print("steps:", self.__length)
