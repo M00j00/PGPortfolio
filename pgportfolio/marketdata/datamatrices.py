@@ -154,8 +154,8 @@ class DataMatrices:
         return self.__pack_samples(self._train_ind[:-self._window_size])
 
     def get_live_set(self):
-        print(np.arange(self._num_periods)[:-self._window_size:])
-        return self.__pack_samples(np.arange(self._num_periods)[:-self._window_size:])
+        print(np.arange(self._num_periods))
+        return self.__pack_samples(np.arange(self._num_periods))
 
     def next_batch(self):
         """
