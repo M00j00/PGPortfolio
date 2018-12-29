@@ -14,17 +14,17 @@ class LiveTrader(trader.Trader):
             data_matrices = self._rolling_trainer.data_matrices
         else:
             raise ValueError()
-        DataMatrices(start=start,
-                     end=end,
-                     feature_number=config["input"]["feature_number"],
-                     window_size=config["input"]["window_size"],
-                     online=True,
-                     period=config["input"]["global_period"],
-                     volume_average_days=config["input"]["volume_average_days"],
-                     coin_filter=config["input"]["coin_number"],
-                     is_permed=config["input"]["is_permed"],
-                     test_portion=config["input"]["test_portion"],
-                     portion_reversed=config["input"]["portion_reversed"])
+        #DataMatrices(start=start,
+        #             end=end,
+        #             feature_number=config["input"]["feature_number"],
+        #             window_size=config["input"]["window_size"],
+        #             online=True,
+        #             period=config["input"]["global_period"],
+        #             volume_average_days=config["input"]["volume_average_days"],
+        #             coin_filter=config["input"]["coin_number"],
+        #             is_permed=config["input"]["is_permed"],
+        #             test_portion=config["input"]["test_portion"],
+        #             portion_reversed=config["input"]["portion_reversed"])
 
         self.__set = data_matrices.get_test_set()
         self.__length = self.__set["X"].shape[0]
