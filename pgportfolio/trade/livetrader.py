@@ -8,7 +8,7 @@ from pgportfolio.tools.trade import calculate_pv_after_commission
 
 class LiveTrader(trader.Trader):
     def __init__(self, config, net_dir=None, agent=None, agent_type="nn"):
-        trader.Trader.__init__(self, 30, config, 10, net_dir,
+        trader.Trader.__init__(self, 5, config, 10, net_dir,
                                initial_BTC=1, agent=agent, agent_type=agent_type)
         if agent_type == "nn":
             data_matrices = self._rolling_trainer.data_matrices
@@ -40,8 +40,7 @@ class LiveTrader(trader.Trader):
         plt.show()
         """
 
-    def _log_trading_info(self, time, omega):
-        time_index = pd.to_datetime([time], unit='s')
+    def _log_trading_info(self, omega):
         if self._steps > 0:
             logging_dict = {'Total Asset (BTC)': self._total_capital, 'BTC': omega[0, 0]}
             for i in range(len(self._coin_name_list)):
@@ -69,6 +68,7 @@ class LiveTrader(trader.Trader):
     def trade_by_strategy(self, omega):
         logging.info("the step is {}".format(self._steps))
         logging.debug("the raw omega is {}".format(omega))
+        _log_trading_info(self, omega)
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
         portfolio_change = pv_after_commission * np.dot(omega, future_price)
