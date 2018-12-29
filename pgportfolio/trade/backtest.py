@@ -65,6 +65,7 @@ class BackTest(trader.Trader):
         if self._agent_type == "traditional":
             inputs = np.concatenate([np.ones([1, 1, inputs.shape[2]]), inputs], axis=1)
             inputs = inputs[:, :, 1:] / inputs[:, :, :-1]
+        print(inputs)
         return inputs
 
     def trade_by_strategy(self, omega):

@@ -33,6 +33,11 @@ class ReplayBuffer:
         result = end - ran
         return result
 
+    def __print(self):
+        print("Dispay ReplayBuffer\ncoin_num:", self.__coin_number,"\nExperiences:")
+        for xp in self.__experiences:
+            print(xp.state_index)
+
     def next_experience_batch(self):
         # First get a start point randomly
         batch = []

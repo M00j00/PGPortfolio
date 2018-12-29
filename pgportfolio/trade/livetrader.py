@@ -63,12 +63,13 @@ class LiveTrader(trader.Trader):
         self._rolling_trainer.rolling_train()
 
     def generate_history_matrix(self):
+        logging.info("Getting dataset")
         self.__set = self._rolling_trainer.data_matrices.get_live_set()
         return self.__get_matrix_X()
 
     def trade_by_strategy(self, omega):
         logging.info("the step is {}".format(self._steps))
-        logging.debug("the raw omega is {}".format(omega))
+        #logging.debug("the raw omega is {}".format(omega))
         self.__log_pfinfo_info(omega)
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
@@ -79,4 +80,5 @@ class LiveTrader(trader.Trader):
                            portfolio_change
         logging.debug("the portfolio change this period is : {}".format(portfolio_change))
         self.__pc_vector.append(portfolio_change)
+        self.
 
