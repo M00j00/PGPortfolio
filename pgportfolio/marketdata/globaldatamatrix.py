@@ -78,12 +78,12 @@ class HistoryManager:
                     # NOTE: transform the start date to end date
                     if feature == "close":
                         sql = ("SELECT date+300 AS date_norm, close FROM History WHERE"
-                               " date_norm>={start} and date_norm<={end}" 
+                               " date_norm>={start} and date_norm<={end}"
                                " and date_norm%{period}=0 and coin=\"{coin}\"".format(
                                start=start, end=end, period=period, coin=coin))
                     elif feature == "open":
                         sql = ("SELECT date+{period} AS date_norm, open FROM History WHERE"
-                               " date_norm>={start} and date_norm<={end}" 
+                               " date_norm>={start} and date_norm<={end}"
                                " and date_norm%{period}=0 and coin=\"{coin}\"".format(
                                start=start, end=end, period=period, coin=coin))
                     elif feature == "volume":
@@ -114,6 +114,7 @@ class HistoryManager:
                     serial_data = pd.read_sql_query(sql, con=connection,
                                                     parse_dates=["date_norm"],
                                                     index_col="date_norm")
+                    print(serial_data)
                     panel.loc[feature, coin, serial_data.index] = serial_data.squeeze()
                     panel = panel_fillna(panel, "both")
         finally:
