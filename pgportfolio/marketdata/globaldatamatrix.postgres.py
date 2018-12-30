@@ -2,30 +2,30 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 from pgportfolio.marketdata.coinlist import CoinList
 import numpy as np
 import pandas as pd
 from pgportfolio.tools.data import panel_fillna
 import pgportfolio.constants as const
-import sqlite3
+import os
+from urllib import parse
+import psycopg2
 from datetime import datetime
 import logging
-from tqdm import tqdm
+
+parse.uses_netloc.append("postgres")
 
 
 class HistoryManager:
     # if offline ,the coin_list could be None
     # NOTE: return of the sqlite results is a list of tuples, each tuple is a row
-    def __init__(self, market, coin_number, end, volume_average_days=1, volume_forward=0, online=True):
+    def __init__(self, coin_number, end, volume_average_days=1, volume_forward=0, online=True):
         self.initialize_db()
         self.__storage_period = const.FIVE_MINUTE  # keep this as 300
         self._coin_number = coin_number
         self._online = online
         if self._online:
-            self._coin_list = CoinList(market, end, volume_average_days, volume_forward)
+            self._coin_list = CoinList(end, volume_average_days, volume_forward)
         self.__volume_forward = volume_forward
         self.__volume_average_days = volume_average_days
         self.__coins = None
@@ -35,7 +35,8 @@ class HistoryManager:
         return self.__coins
 
     def initialize_db(self):
-        with sqlite3.connect(const.DATABASE_DIR) as connection:
+        url = parse.urlparse(os.environ["DATABASE_URL"])
+        with psycopg2.connect(database=url.path[1:], user=url.username, password=url.password, host=url.hostname, port=url.port) as connection:
             cursor = connection.cursor()
             cursor.execute('CREATE TABLE IF NOT EXISTS History (date INTEGER,'
                            ' coin varchar(20), high FLOAT, low FLOAT,'
@@ -75,56 +76,52 @@ class HistoryManager:
         time_index = pd.to_datetime(list(range(start, end + 1, period)), unit='s')
         panel = pd.Panel(items=features, major_axis=coins, minor_axis=time_index, dtype=np.float32)
 
-        connection = sqlite3.connect(const.DATABASE_DIR)
+        url = parse.urlparse(os.environ["DATABASE_URL"])
+        connection = psycopg2.connect(database=url.path[1:], user=url.username, password=url.password, host=url.hostname, port=url.port)
         try:
-            logging.info("Loading dataset...")
-            with tqdm(total=len(coins) * len(features)) as pbar:
-                for row_number, coin in enumerate(coins):
-                    for feature in features:
-                        # NOTE: transform the start date to end date
-                        if feature == "close":
-                            sql = ("SELECT date+300 AS date_norm, close FROM History WHERE"
-                                   " date_norm>={start} and date_norm<={end}"
-                                   " and date_norm%{period}=0 and coin=\"{coin}\"".format(
-                                   start=start, end=end, period=period, coin=coin))
-                        elif feature == "open":
-                            sql = ("SELECT date+{period} AS date_norm, open FROM History WHERE"
-                                   " date_norm>={start} and date_norm<={end}"
-                                   " and date_norm%{period}=0 and coin=\"{coin}\"".format(
-                                   start=start, end=end, period=period, coin=coin))
-                        elif feature == "volume":
-                            sql = ("SELECT date_norm, SUM(volume)"+
-                                   " FROM (SELECT date+{period}-(date%{period}) "
-                                   "AS date_norm, volume, coin FROM History)"
-                                   " WHERE date_norm>={start} and date_norm<={end} and coin=\"{coin}\""
-                                   " GROUP BY date_norm".format(
-                                        period=period,start=start,end=end,coin=coin))
-                        elif feature == "high":
-                            sql = ("SELECT date_norm, MAX(high)" +
-                                   " FROM (SELECT date+{period}-(date%{period})"
-                                   " AS date_norm, high, coin FROM History)"
-                                   " WHERE date_norm>={start} and date_norm<={end} and coin=\"{coin}\""
-                                   " GROUP BY date_norm".format(
-                                        period=period,start=start,end=end,coin=coin))
-                        elif feature == "low":
-                            sql = ("SELECT date_norm, MIN(low)" +
-                                    " FROM (SELECT date+{period}-(date%{period})"
-                                    " AS date_norm, low, coin FROM History)"
-                                    " WHERE date_norm>={start} and date_norm<={end} and coin=\"{coin}\""
-                                    " GROUP BY date_norm".format(
-                                        period=period,start=start,end=end,coin=coin))
-                        else:
-                            msg = ("The feature %s is not supported" % feature)
-                            logging.error(msg)
-                            raise ValueError(msg)
-                        serial_data = pd.read_sql_query(sql, con=connection,
-                                                        parse_dates=["date_norm"],
-                                                        index_col="date_norm")
-                        #print("Coin:", coin, "feature:", feature, "sql", sql)
-                        #print(serial_data)
-                        panel.loc[feature, coin, serial_data.index] = serial_data.squeeze()
-                        panel = panel_fillna(panel, "both")
-                        pbar.update(1)
+            for row_number, coin in enumerate(coins):
+                for feature in features:
+                    # NOTE: transform the start date to end date
+                    if feature == "close":
+                        sql = ("SELECT date AS date_norm, close FROM History WHERE"
+                               " date>={start} and date<={end}"
+                               " and date%{period}=0 and coin='{coin}'".format(
+                               start=start, end=end, period=period, coin=coin))
+                    elif feature == "open":
+                        sql = ("SELECT date AS date_norm, open FROM History WHERE"
+                               " date>={start} and date<={end}"
+                               " and date%{period}=0 and coin='{coin}'".format(
+                               start=start, end=end, period=period, coin=coin))
+                    elif feature == "volume":
+                        sql = ("SELECT date_norm, SUM(volume)"+
+                               " FROM (SELECT date-(date%{period}) "
+                               "AS date_norm, volume, coin FROM History) AS vTable"
+                               " WHERE date_norm>={start} and date_norm<={end} and coin='{coin}'"
+                               " GROUP BY date_norm".format(
+                                    period=period,start=start,end=end,coin=coin))
+                    elif feature == "high":
+                        sql = ("SELECT date_norm, MAX(high)" +
+                               " FROM (SELECT date-(date%{period})"
+                               " AS date_norm, high, coin FROM History) AS mTable"
+                               " WHERE date_norm>={start} and date_norm<={end} and coin='{coin}'"
+                               " GROUP BY date_norm".format(
+                                    period=period,start=start,end=end,coin=coin))
+                    elif feature == "low":
+                        sql = ("SELECT date_norm, MIN(low)" +
+                               " FROM (SELECT date-(date%{period})"
+                               " AS date_norm, low, coin FROM History) AS mTable"
+                               " WHERE date_norm>={start} and date_norm<={end} and coin='{coin}'"
+                               " GROUP BY date_norm".format(
+                                    period=period,start=start,end=end,coin=coin))
+                    else:
+                        msg = ("The feature %s is not supported" % feature)
+                        logging.error(msg)
+                        raise ValueError(msg)
+                    serial_data = pd.read_sql_query(sql, con=connection,
+                                                    parse_dates=["date_norm"],
+                                                    index_col="date_norm")
+                    panel.loc[feature, coin, serial_data.index] = serial_data.squeeze()
+                    panel = panel_fillna(panel, "both")
         finally:
             connection.commit()
             connection.close()
@@ -135,12 +132,13 @@ class HistoryManager:
         if not self._online:
             logging.info("select coins offline from %s to %s" % (datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M'),
                                                                  datetime.fromtimestamp(end).strftime('%Y-%m-%d %H:%M')))
-            connection = sqlite3.connect(const.DATABASE_DIR)
+            url = parse.urlparse(os.environ["DATABASE_URL"])
+            connection = psycopg2.connect(database=url.path[1:], user=url.username, password=url.password, host=url.hostname, port=url.port)
             try:
                 cursor = connection.cursor()
                 cursor.execute('SELECT coin,SUM(volume) AS total_volume FROM History WHERE'
-                               ' date>=? and date<=? GROUP BY coin'
-                               ' ORDER BY total_volume DESC LIMIT ?;',
+                               ' date>=%s and date<=%s GROUP BY coin'
+                               ' ORDER BY total_volume DESC LIMIT %s;',
                                (int(start), int(end), self._coin_number))
                 coins_tuples = cursor.fetchall()
 
@@ -175,11 +173,14 @@ class HistoryManager:
 
     # add new history data into the database
     def update_data(self, start, end, coin):
-        connection = sqlite3.connect(const.DATABASE_DIR)
+        url = parse.urlparse(os.environ["DATABASE_URL"])
+        connection = psycopg2.connect(database=url.path[1:], user=url.username, password=url.password, host=url.hostname, port=url.port)
         try:
             cursor = connection.cursor()
-            min_date = cursor.execute('SELECT MIN(date) FROM History WHERE coin=?;', (coin,)).fetchall()[0][0]
-            max_date = cursor.execute('SELECT MAX(date) FROM History WHERE coin=?;', (coin,)).fetchall()[0][0]
+            cursor.execute('SELECT MIN(date) FROM History WHERE coin=(%s);', (coin,))
+            min_date = cursor.fetchall()[0][0]
+            cursor.execute('SELECT MAX(date) FROM History WHERE coin=(%s);', (coin,))
+            max_date = cursor.fetchall()[0][0]
 
             if (min_date is None) or (max_date is None):
                 self.__fill_data(start, end, coin, cursor)
@@ -202,8 +203,8 @@ class HistoryManager:
             start=start,
             end=end,
             period=self.__storage_period)
-        logging.info("Populating database with %s data from %s to %s"%(coin, datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M'),
-                                            datetime.fromtimestamp(end).strftime('%Y-%m-%d %H:%M')))
+        logging.info("fill %s data from %s to %s" % (coin, datetime.fromtimestamp(start).strftime('%Y-%m-%d %H:%M'),
+                                                     datetime.fromtimestamp(end).strftime('%Y-%m-%d %H:%M')))
         for c in chart:
             if c["date"] > 0:
                 if c['weightedAverage'] == 0:
@@ -213,12 +214,22 @@ class HistoryManager:
 
                 # NOTE here the USDT is in reversed order
                 if 'reversed_' in coin:
-                    cursor.execute('INSERT INTO History VALUES (?,?,?,?,?,?,?,?,?)',
+                    cursor.execute('INSERT INTO History (date, coin, high, low, open, close, volume, quoteVolume, weightedAverage) \
+                                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) \
+                                    ON CONFLICT (date, coin) \
+                                    DO UPDATE SET \
+                                        (high, low, open, close, volume, quoteVolume, weightedAverage) \
+                                        = (EXCLUDED.high, EXCLUDED.low, EXCLUDED.open, EXCLUDED.close, EXCLUDED.volume, EXCLUDED.quoteVolume, EXCLUDED.weightedAverage)',
                         (c['date'],coin,1.0/c['low'],1.0/c['high'],1.0/c['open'],
                         1.0/c['close'],c['quoteVolume'],c['volume'],
                         1.0/weightedAverage))
                 else:
-                    cursor.execute('INSERT INTO History VALUES (?,?,?,?,?,?,?,?,?)',
+                    cursor.execute('INSERT INTO History (date, coin, high, low, open, close, volume, quoteVolume, weightedAverage) \
+                                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) \
+                                    ON CONFLICT (date, coin) \
+                                    DO UPDATE SET \
+                                        (high, low, open, close, volume, quoteVolume, weightedAverage) \
+                                        = (EXCLUDED.high, EXCLUDED.low, EXCLUDED.open, EXCLUDED.close, EXCLUDED.volume, EXCLUDED.quoteVolume, EXCLUDED.weightedAverage)',
                                    (c['date'],coin,c['high'],c['low'],c['open'],
                                     c['close'],c['volume'],c['quoteVolume'],
                                     weightedAverage))

@@ -1,16 +1,41 @@
 # User Guide
+
+## Quickstart
+
+1. Edit [`pgportfolio/net_config.json`](pgportfolio/net_config.json)
+2. Generate an agent:
+```
+python main.py --mode=generate --repeat=1
+```
+3. Download the data:
+```
+python main.py --mode=download_data
+```
+4. Train the agent:
+```
+python main.py --mode=train --processes=1
+```
+5. Compare the result with other algorithms:
+```
+python main.py --mode=plot --algos=crp,olmar,1 --labels=crp,olmar,nnagent
+python main.py --mode=table --algos=1,olmar,ons --labels=nntrader,olmar,ons`
+```
+
+See below for details on each step.
+
 ## Configuration File
-Under the `nntrader/nntrader` directory, there is a json file called `net_config.json`,
- holding all the configuration of the agent and could be modified outside the program code.
+`pgportfolio/net_config.json` contains all the configuration parameters. The software can be configured by modifying this file and without any changes to the code.
+
+Here is a description of the parameters in the configuration file.
 ### Network Topology
 * `"layers"`
     * layers list of the CNN, including the output layer
     * `"type"`
         * domain is {"ConvLayer", "FullyLayer", "DropOut", "MaxPooling",
         "AveragePooling", "LocalResponseNormalization", "SingleMachineOutput",
-        "LSTMSingleMachine", "RNNSingleMachine"}
+        "LSTMSingleMachine", "RNNSingleMachine", "EIIE_Dense", "EIIE_Output_WithW"}
     * `"filter shape"`
-        * shape of the filter (kernal) of the Convolution Layer
+        * shape of the filter (kernel) of the Convolutional Layer
 * `"input"`
     * `"window_size"`
         * number of columns of the input matrix
@@ -27,18 +52,20 @@ Under the `nntrader/nntrader` directory, there is a json file called `net_config
 * `"input "`
     * `"start_date"`
         * start date of the global data matrix
-        * format is yyyy/MM/dd
+        * format is YYYY/MM/DD
     * `"end_date"`
         * start date of the global data matrix
-        * format is yyyy/MM/dd
-        * The performance could varied a lot in different time ranges.
+        * format is YYYY/MM/DD
+        * Performance can vary a lot in different time ranges.
     * `"volume_average_days"`
         * number of days of volume used to select the coins
+    * `"market"`
+        * The exchange to use to retrieve data.
     * `"test_portion"`
-        * portion of backtest data, ranging from 0 to 1. The left is training data.
+        * portion of backtest data, ranging from 0 to 1. Example: 0.08 means that the initial 92% of the global data matrix is used for training and the following 8% is used for testing. This version of the library does not allow for separate validation and test periods.
     * `"global_period"`
-        * trading period and period of prices in input window.
-        * should be a multiple of 300 (seconds)
+        * trading period and period of prices in input window, i.e. duration of each candlestick.
+        * should be a multiple of 300 (seconds). Default value is 1800 i.e. half an hour.
     * `"coin_number"`
         * number of assets to be traded.
         * does not include cash (i.e. btc)
@@ -63,8 +90,8 @@ Under the `nntrader/nntrader` directory, there is a json file called `net_config
       * On GTX1060 you should be able to run 2-3 training together.
     * Each training process is made up from 2 stages:
       * Pre-training, log example:
-      
-      
+
+
 ```
 INFO:root:average time for data accessing is 0.00070324587822
 INFO:root:average time for training is 0.0032548391819
@@ -79,8 +106,8 @@ log mean without commission fee is 0.000378
 INFO:root:==============================
 
 ```
-        
-        
+
+
       * Backtest with rolling train, log example:
 ```
         DEBUG:root:==============================
@@ -99,7 +126,7 @@ There are three types of logging of each training.
 * The summary infomation of this training, including network configuration, portfolio value on validation set and test set etc., will be saved in the `train_summary.csv` under `train_pakage` folder
 
 ## Save and Restore of the Model
-* The trained weights of the network are saved at `train_package/1` named as `netfile` (including 3 files). 
+* The trained weights of the network are saved at `train_package/1` named as `netfile` (including 3 files).
 
 ## Download Data
 * Type `python main.py --mode=download_data` you can download data without starting training
@@ -108,7 +135,7 @@ There are three types of logging of each training.
 * The downloading speed could be very slow and sometimes even have error in China.
 * For those who cann't download data, please check the first release where there is a `Data.db` file, put it in the database folder. Make sure the `online` in `input` in `net_config.json` to be `false` and run the example.
   * Note that using the this file, you shouldn't make any changes to input data configuration(For example `start_date`, `end_date` or `coin_number`) otherwise incorrect result might be presented.
-  
+
 ## Back-test
 *Note: Before back-testing, you need to suceessfully finish training of algo first*
 * Type `python main.py --mode=backtest --algo=1` to execute
@@ -130,10 +157,15 @@ the index of nnagent
 * result is
 ![](http://static.zybuluo.com/rooftrellen/u75egf9roy9c2sju48v6uu6o/result.png)
 
-## present backtest results in a table
-* type `python main.py --mode=table --algos=1,olmar,ons --labels=nntrader,olmar,ons`
-* `--algos` and `--lables` are the same as in plotting case
-* result:
+## Table summary
+You can present a summary of the results typing:
+
+```
+python main.py --mode=table --algos=1,olmar,ons --labels=nntrader,olmar,ons
+```
+
+* `--algos` and `--labels` are the same as in plotting case. Labels indicate the row indexes. The result table looks like this:
+
 ```
            average  max drawdown  negative day  negative periods  negative week  portfolio value  positive periods  postive day  postive week  sharpe ratio
 nntrader  1.001311      0.225874           781              1378            114        25.022516              1398         1995          2662      0.074854
