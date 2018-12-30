@@ -65,12 +65,19 @@ class BackTest(trader.Trader):
         if self._agent_type == "traditional":
             inputs = np.concatenate([np.ones([1, 1, inputs.shape[2]]), inputs], axis=1)
             inputs = inputs[:, :, 1:] / inputs[:, :, :-1]
-        print(inputs)
         return inputs
+
+    def __log_pfinfo_info(self, omega):
+        if self._steps > 0:
+            logging_dict = {'Total Asset (BTC)': self._total_capital, 'BTC': omega[0]}
+            for i in range(len(self._coin_name_list)):
+                logging_dict[self._coin_name_list[i]] = omega[i + 1]
+            logging.debug(logging_dict)
 
     def trade_by_strategy(self, omega):
         logging.info("the step is {}".format(self._steps))
-        logging.debug("the raw omega is {}".format(omega))
+        #logging.debug("the raw omega is {}".format(omega))
+        self.__log_pfinfo_info(omega)
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
         portfolio_change = pv_after_commission * np.dot(omega, future_price)

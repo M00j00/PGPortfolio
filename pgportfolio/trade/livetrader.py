@@ -12,7 +12,7 @@ class LiveTrader(trader.Trader):
         trader.Trader.__init__(self, 20, config, 10, net_dir,
                                initial_BTC=1, agent=agent, agent_type=agent_type)
 
-        self.__set = self._rolling_trainer.data_matrices.get_test_set()
+        self.__set = self._rolling_trainer.data_matrices.get_live_set()
         #self.__test_set = self._rolling_trainer.data_matrices.get_test_set()
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
@@ -65,7 +65,7 @@ class LiveTrader(trader.Trader):
 
     def generate_history_matrix(self):
         logging.info("Getting dataset")
-        self.__set = self._rolling_trainer.data_matrices.get_test_set()
+        self.__set = self._rolling_trainer.data_matrices.get_live_set()
         return self.__get_matrix_X()
 
     def trade_by_strategy(self, omega):
