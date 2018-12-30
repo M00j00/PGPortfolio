@@ -16,7 +16,7 @@ class LiveTrader(trader.Trader):
         #self.__test_set = self._rolling_trainer.data_matrices.get_test_set()
         self.__length = self.__set["X"].shape[0]
         self._total_steps = self.__length
-        self._steps = self._total_steps - 1
+        self._steps = self._total_steps - 2
         print("step:", self._steps)
         self.__pv = 1.0
         self.__pc_vector = []
@@ -75,6 +75,7 @@ class LiveTrader(trader.Trader):
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
         print("future_price:", future_price)
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
+        print("pv_after_com::", pv_after_commission)
         portfolio_change = pv_after_commission * np.dot(omega, future_price)
         self._total_capital *= portfolio_change
         self._last_omega = pv_after_commission * omega * \
