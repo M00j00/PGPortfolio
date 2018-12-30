@@ -72,8 +72,8 @@ class LiveTrader(trader.Trader):
         logging.info("the step is {}".format(self._steps))
         #logging.debug("the raw omega is {}".format(omega))
         self.__log_pfinfo_info(omega)
+
         future_price = np.concatenate((np.ones(1), self.__get_matrix_y()))
-        print("future_price:", future_price)
         pv_after_commission = calculate_pv_after_commission(omega, self._last_omega, self._commission_rate)
         print("pv_after_com::", pv_after_commission)
         portfolio_change = pv_after_commission * np.dot(omega, future_price)
