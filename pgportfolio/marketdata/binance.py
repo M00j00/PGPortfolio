@@ -62,7 +62,7 @@ class Binance:
                 arg['startTime'] = args['startTime'] + self.convertIntervalToPeriod(args['interval']) * 500 * i * 1000
                 arg['endTime'] = args['startTime'] + self.convertIntervalToPeriod(args['interval']) * 500 * (i + 1) * 1000
                 result = result + self.api(command, convertionType, arg)
-                time.sleep(.100)  # prevent rate limit issues (max 20 r/s)
+                time.sleep(2.100)  # prevent rate limit issues (max 20 r/s)
             return sorted([dict(t) for t in set([tuple(d.items()) for d in result])], key=lambda k: k['date'])
 
         elif command in PUBLIC_COMMANDS:
